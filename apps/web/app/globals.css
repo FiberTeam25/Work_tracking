@@ -1,0 +1,148 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-0: #0a0e14;
+  --bg-1: #11161d;
+  --bg-2: #1a2028;
+  --bg-3: #242c38;
+  --line: #2a3442;
+  --line-2: #3a4758;
+  --ink-0: #e8edf3;
+  --ink-1: #a8b4c4;
+  --ink-2: #6b7788;
+  --accent: #ff7a1a;
+  --accent-2: #00d4ff;
+  --success: #32d583;
+  --warn: #fdb022;
+  --danger: #f04438;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg-0);
+  color: var(--ink-0);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Blueprint grid background matching prototype */
+.bg-blueprint {
+  background-image: linear-gradient(rgba(42, 52, 66, 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(42, 52, 66, 0.35) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-1);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-2);
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-2);
+}
+
+/* Status chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: 500;
+  border: 1px solid;
+  border-radius: 2px;
+  font-family: var(--font-jetbrains-mono), monospace;
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 4px;
+  background: var(--bg-3);
+  position: relative;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.5s;
+}
+
+/* Card — dark panel with border */
+.card {
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+}
+
+/* Primary accent button */
+.btn-accent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  background: var(--accent);
+  color: #000;
+  font-weight: 600;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.btn-accent:hover {
+  opacity: 0.85;
+}
+
+/* Form input */
+.input {
+  padding: 6px 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  color: var(--ink-0);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.input:focus {
+  border-color: var(--accent-2);
+}
+.input::placeholder {
+  color: var(--ink-2);
+}
+
+/* Ghost / secondary button */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  background: transparent;
+  color: var(--ink-1);
+  font-weight: 500;
+  font-size: 13px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.btn-ghost:hover {
+  border-color: var(--line-2);
+  color: var(--ink-0);
+}

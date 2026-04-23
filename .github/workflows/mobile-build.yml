@@ -1,0 +1,104 @@
+name: Mobile Build (EAS)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - 'packages/shared/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'EAS Build profile'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - development
+          - preview
+          - production
+      submit:
+        description: 'Submit to Play Store after build?'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  type-check:
+    name: Type Check Mobile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm --filter @ftth/mobile type-check
+
+  build-android:
+    name: Build Android (${{ inputs.profile || 'preview' }})
+    runs-on: ubuntu-latest
+    needs: type-check
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build Android
+        working-directory: apps/mobile
+        run: |
+          eas build \
+            --platform android \
+            --profile ${{ inputs.profile || 'preview' }} \
+            --non-interactive \
+            ${{ (inputs.profile == 'production' && inputs.submit == 'true') && '' || '--no-wait' }}
+        env:
+          EXPO_PUBLIC_SUPABASE_URL:     ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          EXPO_PUBLIC_API_URL:          ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          EXPO_PUBLIC_SENTRY_DSN:       ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
+
+      - name: Submit to Play Store
+        if: ${{ inputs.profile == 'production' && inputs.submit == 'true' }}
+        working-directory: apps/mobile
+        run: eas submit --platform android --profile production --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Create Sentry release for mobile
+        if: ${{ inputs.profile == 'production' }}
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG:        ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT:    ftth-mobile
+        with:
+          environment: production

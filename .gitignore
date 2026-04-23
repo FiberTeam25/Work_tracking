@@ -1,0 +1,15 @@
+node_modules
+.turbo
+dist
+.next
+.expo
+*.local
+.env
+.env.*
+!.env.example
+supabase/.temp
+coverage
+# Playwright
+playwright-report
+test-results
+tests/e2e/.auth-state.json
