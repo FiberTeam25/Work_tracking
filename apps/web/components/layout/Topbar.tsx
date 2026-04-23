@@ -14,6 +14,7 @@ export function Topbar({ profile }: { profile: Profile }) {
   const supabase = createBrowserClient()
 
   async function signOut() {
+    document.cookie = 'ftth_demo=; Path=/; Max-Age=0; SameSite=Lax'
     await supabase.auth.signOut()
     router.push('/login')
     router.refresh()

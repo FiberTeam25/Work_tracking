@@ -2,19 +2,44 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "module": "esnext",
     "moduleResolution": "bundler",
     "jsx": "preserve",
     "incremental": true,
-    "plugins": [{ "name": "next" }],
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "paths": {
-      "@/*": ["./*"],
-      "@ftth/shared": ["../../packages/shared/src/index.ts"],
-      "@ftth/db-types": ["../../packages/db-types/src/index.ts"],
-      "@ftth/ui": ["../../packages/ui/src/index.ts"]
-    }
+      "@/*": [
+        "./*"
+      ],
+      "@ftth/shared": [
+        "../../packages/shared/src/index.ts"
+      ],
+      "@ftth/db-types": [
+        "../../packages/db-types/src/index.ts"
+      ],
+      "@ftth/ui": [
+        "../../packages/ui/src/index.ts"
+      ]
+    },
+    "allowJs": true,
+    "noEmit": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

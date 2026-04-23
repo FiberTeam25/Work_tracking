@@ -1,7 +1,18 @@
 'use client'
 
-import * as Sentry from '@sentry/nextjs'
 import { useEffect } from 'react'
+
+async function captureWithSentry(error: Error) {
+  try {
+    const loadModule = new Function('m', 'return import(m)')
+    const Sentry = (await loadModule('@sentry/nextjs')) as {
+      captureException?: (error: Error) => void
+    }
+    Sentry.captureException?.(error)
+  } catch {
+    // Sentry is optional during local development/build verification.
+  }
+}
 
 export default function GlobalError({
   error,
@@ -11,7 +22,7 @@ export default function GlobalError({
   reset: () => void
 }) {
   useEffect(() => {
-    Sentry.captureException(error)
+    void captureWithSentry(error)
   }, [error])
 
   return (

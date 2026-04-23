@@ -75,14 +75,8 @@ export function RecentTasksCard({ tasks }: { tasks: Task[] }) {
             return (
               <tr
                 key={task.id}
-                className="cursor-pointer transition-colors"
+                className="transition-colors"
                 style={{ borderBottom: '1px solid var(--line)' }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLElement).style.background = 'var(--bg-2)')
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLElement).style.background = 'transparent')
-                }
               >
                 <td className="px-3 py-2.5 font-mono" style={{ color: 'var(--ink-2)' }}>
                   {time}

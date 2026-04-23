@@ -1,13 +1,57 @@
 import { notFound } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { InvoiceDetail } from '@/components/invoices/InvoiceDetail'
+import type { Database } from '@ftth/db-types'
 
 export const revalidate = 0
+
+type InvoiceLineRow = {
+  id: string
+  quantity: number | null
+  unit_price: number | null
+  line_total: number | null
+  task_count?: number | null
+  contract_items: {
+    code: string
+    description_ar: string
+    description_en: string | null
+    unit: string
+    contract_groups: {
+      code: string
+      name_ar: string
+    } | null
+  } | null
+}
+
+type InvoiceDetailRow = Pick<
+  Database['public']['Tables']['invoices']['Row'],
+  | 'id'
+  | 'invoice_number'
+  | 'period_start'
+  | 'period_end'
+  | 'status'
+  | 'notes'
+  | 'subtotal'
+  | 'retention_pct'
+  | 'tax_pct'
+  | 'retention_amt'
+  | 'tax_amt'
+  | 'net_payable'
+  | 'pdf_url'
+  | 'excel_url'
+  | 'approved_at'
+> & {
+  project: { code: string; name_ar: string; name_en: string | null } | null
+  site: { code: string; name_ar: string } | null
+  created_by_profile: { full_name: string } | null
+  approved_by_profile: { full_name: string } | null
+  invoice_lines: InvoiceLineRow[] | null
+}
 
 export default async function InvoiceDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createServerClient()
 
-  const { data: invoice } = await supabase
+  const { data: invoiceData } = await supabase
     .from('invoices')
     .select(`
       id, invoice_number, period_start, period_end, status, notes,
@@ -28,6 +72,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
     .eq('id', params.id)
     .single()
 
+  const invoice = invoiceData as InvoiceDetailRow | null
   if (!invoice) notFound()
 
   // Sort invoice lines by BOQ code

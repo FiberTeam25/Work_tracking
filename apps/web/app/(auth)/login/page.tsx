@@ -29,6 +29,12 @@ export default function LoginPage() {
     router.refresh()
   }
 
+  function handleDemoAccess() {
+    document.cookie = 'ftth_demo=1; Path=/; Max-Age=86400; SameSite=Lax'
+    router.push('/')
+    router.refresh()
+  }
+
   return (
     <div
       className="min-h-screen flex items-center justify-center"
@@ -38,7 +44,6 @@ export default function LoginPage() {
         className="w-full max-w-sm p-8"
         style={{ background: 'var(--bg-1)', border: '1px solid var(--line)' }}
       >
-        {/* Logo */}
         <div className="flex items-center gap-3 mb-8">
           <div
             className="w-10 h-10 flex items-center justify-center font-black text-black text-sm font-mono"
@@ -54,14 +59,28 @@ export default function LoginPage() {
               FieldOps FTTH
             </div>
             <div className="text-xs" style={{ color: 'var(--ink-2)' }}>
-              Afro Group · نظام الإدارة
+              Demo or account login
             </div>
           </div>
         </div>
 
         <h1 className="text-lg font-semibold mb-6" style={{ color: 'var(--ink-0)' }}>
-          تسجيل الدخول
+          Sign in
         </h1>
+
+        <button
+          type="button"
+          onClick={handleDemoAccess}
+          className="w-full py-3 text-sm font-bold mb-4"
+          style={{
+            background: 'var(--bg-2)',
+            color: 'var(--ink-0)',
+            border: '1px solid var(--line)',
+            cursor: 'pointer',
+          }}
+        >
+          Enter Demo Without Email
+        </button>
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div>
@@ -69,7 +88,7 @@ export default function LoginPage() {
               className="block text-xs uppercase tracking-widest mb-2"
               style={{ color: 'var(--ink-2)' }}
             >
-              البريد الإلكتروني
+              Email
             </label>
             <input
               type="email"
@@ -91,7 +110,7 @@ export default function LoginPage() {
               className="block text-xs uppercase tracking-widest mb-2"
               style={{ color: 'var(--ink-2)' }}
             >
-              كلمة المرور
+              Password
             </label>
             <input
               type="password"
@@ -132,7 +151,7 @@ export default function LoginPage() {
               cursor: loading ? 'not-allowed' : 'pointer',
             }}
           >
-            {loading ? '...' : 'دخول'}
+            {loading ? '...' : 'Sign in'}
           </button>
         </form>
       </div>

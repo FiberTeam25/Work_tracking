@@ -1,6 +1,32 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { getTranslations } from 'next-intl/server'
 import { canSeePrices } from '@ftth/shared'
+import type { Database } from '@ftth/db-types'
+
+type ProfileAccess = Pick<
+  Database['public']['Tables']['profiles']['Row'],
+  'role' | 'can_see_prices'
+>
+
+type ContractItemRow = Pick<
+  Database['public']['Tables']['contract_items']['Row'],
+  | 'id'
+  | 'code'
+  | 'description_ar'
+  | 'description_en'
+  | 'unit'
+  | 'task_type'
+  | 'contract_qty'
+  | 'unit_price'
+  | 'sort_order'
+>
+
+type ContractGroupRow = Pick<
+  Database['public']['Tables']['contract_groups']['Row'],
+  'id' | 'code' | 'name_ar' | 'name_en' | 'sort_order'
+> & {
+  items: ContractItemRow[] | null
+}
 
 export const revalidate = 300
 
@@ -9,15 +35,16 @@ export default async function ContractPage() {
   const supabase = await createServerClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  const { data: profile } = await supabase
+  const { data: profileData } = await supabase
     .from('profiles')
     .select('role, can_see_prices')
     .eq('id', user!.id)
     .single()
 
+  const profile = profileData as ProfileAccess | null
   const showPrices = profile ? canSeePrices(profile.role as any) || profile.can_see_prices : false
 
-  const { data: groups } = await supabase
+  const { data: groupsData } = await supabase
     .from('contract_groups')
     .select(`
       id, code, name_ar, name_en, sort_order,
@@ -28,6 +55,8 @@ export default async function ContractPage() {
     `)
     .order('sort_order')
 
+  const groups = (groupsData ?? []) as ContractGroupRow[]
+
   const formatEGP = (n: number) =>
     new Intl.NumberFormat('ar-EG', { minimumFractionDigits: 2 }).format(n)
 
@@ -35,7 +64,7 @@ export default async function ContractPage() {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold text-ink-0">{t('title')}</h1>
 
-      {(groups ?? []).map((group) => {
+      {groups.map((group) => {
         const sortedItems = [...(group.items ?? [])].sort((a, b) => a.sort_order - b.sort_order)
         const groupTotal = sortedItems.reduce(
           (sum, item) => sum + (item.contract_qty ?? 0) * (item.unit_price ?? 0),

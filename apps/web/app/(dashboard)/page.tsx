@@ -5,6 +5,7 @@ import { CabinetProgress } from '@/components/dashboard/CabinetProgress'
 import { AlertsPanel } from '@/components/dashboard/AlertsPanel'
 import { RecentTasksCard } from '@/components/dashboard/RecentTasksCard'
 import { SiteMapCard } from '@/components/dashboard/SiteMapCard'
+import { cookies } from 'next/headers'
 
 export const revalidate = 60 // ISR — refresh every 60 seconds
 
@@ -45,6 +46,72 @@ async function getDashboardData(projectId: string) {
 }
 
 export default async function DashboardPage() {
+  const cookieStore = await cookies()
+  const isDemo = cookieStore.get('ftth_demo')?.value === '1'
+
+  if (isDemo) {
+    return (
+      <div className="p-6">
+        <div
+          className="flex items-end justify-between pb-4 mb-5"
+          style={{ borderBottom: '1px solid var(--line)' }}
+        >
+          <div>
+            <h1
+              className="text-xl font-semibold flex items-center gap-3"
+              style={{ color: 'var(--ink-0)' }}
+            >
+              Dashboard
+              <span
+                className="font-mono text-xs px-2 py-1"
+                style={{
+                  color: 'var(--accent)',
+                  background: 'rgba(255,122,26,.1)',
+                  border: '1px solid rgba(255,122,26,.3)',
+                }}
+              >
+                DEMO
+              </span>
+            </h1>
+            <div className="text-xs mt-1" style={{ color: 'var(--ink-2)' }}>
+              Local preview without Supabase login
+            </div>
+          </div>
+        </div>
+
+        <Suspense fallback={<div className="h-24 mb-5" style={{ background: 'var(--bg-1)' }} />}>
+          <KpiRow kpis={null} />
+        </Suspense>
+
+        <div className="grid gap-4" style={{ gridTemplateColumns: '2fr 1fr' }}>
+          <div className="flex flex-col gap-4">
+            <div style={{ background: 'var(--bg-1)', border: '1px solid var(--line)' }}>
+              <div
+                className="flex items-center justify-between px-4 py-3"
+                style={{ borderBottom: '1px solid var(--line)' }}
+              >
+                <div className="text-sm font-semibold" style={{ color: 'var(--ink-0)' }}>
+                  Demo Map
+                </div>
+              </div>
+              <div
+                className="flex items-center justify-center"
+                style={{ height: '380px', color: 'var(--ink-2)', background: 'var(--bg-0)' }}
+              >
+                Map preview is disabled in demo mode.
+              </div>
+            </div>
+            <RecentTasksCard tasks={[]} />
+          </div>
+          <div className="flex flex-col gap-4">
+            <CabinetProgress cabinets={[]} />
+            <AlertsPanel alerts={[]} />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const supabase = await createServerClient()
   const { data: projects } = await supabase
     .from('projects')

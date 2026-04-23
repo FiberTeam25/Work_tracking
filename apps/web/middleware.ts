@@ -2,8 +2,8 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const PUBLIC_ROUTES = ['/login']
+const DEMO_COOKIE = 'ftth_demo'
 
-// Routes that require specific roles
 const ROLE_ROUTES: Record<string, string[]> = {
   '/invoices': ['admin', 'project_manager', 'finance'],
   '/contract': ['admin', 'project_manager', 'finance'],
@@ -12,6 +12,17 @@ const ROLE_ROUTES: Record<string, string[]> = {
 }
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const isDemo = request.cookies.get(DEMO_COOKIE)?.value === '1'
+
+  if (isDemo) {
+    if (PUBLIC_ROUTES.includes(pathname)) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -37,19 +48,14 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const { pathname } = request.nextUrl
-
-  // Unauthenticated → login
   if (!user && !PUBLIC_ROUTES.includes(pathname)) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Authenticated on login page → dashboard
   if (user && PUBLIC_ROUTES.includes(pathname)) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
-  // Role-based route protection
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
