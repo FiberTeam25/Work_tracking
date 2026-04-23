@@ -16,12 +16,14 @@ const SiteMap = dynamic(() => import('@/components/map/SiteMap'), {
 export default async function MapPage() {
   const supabase = await createServerClient()
 
-  const { data: project } = await supabase
+  const { data: projectData } = await supabase
     .from('projects')
     .select('id, code, name_ar')
     .eq('is_active', true)
     .limit(1)
     .maybeSingle()
+
+  const project = projectData as { id: string; code: string; name_ar: string } | null
 
   const { data: stats } = await supabase
     .from('cabinets')
