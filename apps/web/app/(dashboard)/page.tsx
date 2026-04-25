@@ -7,7 +7,7 @@ import { RecentTasksCard } from '@/components/dashboard/RecentTasksCard'
 import { SiteMapCard } from '@/components/dashboard/SiteMapCard'
 import { cookies } from 'next/headers'
 
-export const revalidate = 60 // ISR — refresh every 60 seconds
+export const dynamic = 'force-dynamic'
 
 async function getDashboardData(projectId: string) {
   const supabase = await createServerClient()
