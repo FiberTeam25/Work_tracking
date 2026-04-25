@@ -59,12 +59,21 @@ export async function middleware(request: NextRequest) {
       const loginUrl = new URL('/login', request.url)
       // Prevent redirect loop: if already heading to login, let through
       if (pathname === '/login') return NextResponse.next({ request })
-      return NextResponse.redirect(loginUrl)
+      const redirectRes = NextResponse.redirect(loginUrl)
+      // Copy auth cookies so session refresh tokens survive the redirect
+      supabaseResponse.cookies.getAll().forEach(({ name, value, ...opts }) =>
+        redirectRes.cookies.set(name, value, opts)
+      )
+      return redirectRes
     }
 
     // Authenticated user on login page → send to dashboard
     if (pathname === '/login') {
-      return NextResponse.redirect(new URL('/', request.url))
+      const redirectRes = NextResponse.redirect(new URL('/', request.url))
+      supabaseResponse.cookies.getAll().forEach(({ name, value, ...opts }) =>
+        redirectRes.cookies.set(name, value, opts)
+      )
+      return redirectRes
     }
 
     // Role-based access control
@@ -79,7 +88,11 @@ export async function middleware(request: NextRequest) {
       if (profile) {
         const allowedRoles = ROLE_ROUTES[matchedRoute]!
         if (!allowedRoles.includes(profile.role)) {
-          return NextResponse.redirect(new URL('/', request.url))
+          const redirectRes = NextResponse.redirect(new URL('/', request.url))
+          supabaseResponse.cookies.getAll().forEach(({ name, value, ...opts }) =>
+            redirectRes.cookies.set(name, value, opts)
+          )
+          return redirectRes
         }
       }
     }
